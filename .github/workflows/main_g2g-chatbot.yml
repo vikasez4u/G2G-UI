@@ -75,5 +75,5 @@ jobs:
         with:
           app-name: 'g2g-chatbot'
           slot-name: 'Production'
-          package: .
+          package: ./build
           
