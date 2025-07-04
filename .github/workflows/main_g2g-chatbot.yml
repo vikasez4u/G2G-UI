@@ -26,6 +26,8 @@ jobs:
       - name: npm install, build, and test
         run: |
           npm install
+          npm install react react-dom
+          npm install --save-dev vite
           npm run dev
 
       - name: Zip artifact for deployment
