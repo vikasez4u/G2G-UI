@@ -34,7 +34,7 @@ jobs:
           npm install
           npm install react react-dom
           npm install --save-dev vite
-          npm run dev
+          npm run build
 
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
