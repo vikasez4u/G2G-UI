@@ -31,9 +31,10 @@ jobs:
       
       - name: npm install, build, and test
         run: |
-          npm install
+          npm install -g npm@11.4.2
           npm install react react-dom
           npm install --save-dev vite
+          npm install serve --save
           npm run build
 
       - name: Zip artifact for deployment
