@@ -89,7 +89,7 @@ export default function SignInModal({ onClose, onSignedIn, theme }) {
     }
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/signin', {
+      const res = await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/signin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email }),

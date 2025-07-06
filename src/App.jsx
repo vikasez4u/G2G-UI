@@ -47,7 +47,7 @@ export default function App() {
 
   useEffect(() => {
     if (signedInUser) {
-      fetch(`http://127.0.0.1:8000/get_history?email=${signedInUser.email}`)
+      fetch(`https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/get_history?email=${signedInUser.email}`)
         .then(res => res.json())
         .then(data => {
           if (data.history) {
@@ -116,7 +116,7 @@ export default function App() {
     abortControllerRef.current = controller;
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/chat', {
+      const res = await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: message }),
@@ -142,7 +142,7 @@ export default function App() {
 
       if (signedInUser) {
         for (const msg of [...(sessions[sessionId] || []), { sender: 'user', text: message }, botMsg]) {
-          await fetch('http://127.0.0.1:8000/save_message', {
+          await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/save_message', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -188,7 +188,7 @@ export default function App() {
       const sessionId = item.session_id;
       setCurrentSessionId(sessionId);
       setChatStarted(true);
-      const res = await fetch('http://127.0.0.1:8000/get_session', {
+      const res = await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/get_session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: sessionId, email: signedInUser.email }),
