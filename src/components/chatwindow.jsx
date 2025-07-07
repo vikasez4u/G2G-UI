@@ -17,17 +17,17 @@ export default function ChatWindow({ messages, isSidebarOpen, onSend, onStop, is
     const lastUserMessage = messages.filter(m => m.sender === 'user').at(-1)?.text || '';
     const lastBotMessage = messages.filter(m => m.sender === 'bot').at(-1);
 
-    if (!isGenerating && lastUserMessage && lastBotMessage) {
-      fetch(url+`/suggest?q=${encodeURIComponent(lastUserMessage)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) setSuggestions(data);
-        })
-        .catch((err) => {
-          console.error("❌ Suggestion fetch error:", err);
-          setSuggestions([]);
-        });
-    }
+    // if (!isGenerating && lastUserMessage && lastBotMessage) {
+    //   fetch(url+`/suggest?q=${encodeURIComponent(lastUserMessage)}`)
+    //     .then(res => res.json())
+    //     .then(data => {
+    //       if (Array.isArray(data)) setSuggestions(data);
+    //     })
+    //     .catch((err) => {
+    //       console.error("❌ Suggestion fetch error:", err);
+    //       setSuggestions([]);
+    //     });
+    // }
   }, [isGenerating, messages]);
 
   const handleFeedback = async (idx, question, response, feedbackType) => {
