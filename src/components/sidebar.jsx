@@ -28,7 +28,7 @@ const Sidebar = ({
 
   const menuItems = [
     { icon: <MessageCircle size={20} />, label: "New Chat", action: onHomeClick },
-    { icon: <User size={20} />, label: "Profile", action: onProfileClick },
+    // { icon: <User size={20} />, label: "Profile", action: onProfileClick },
     { icon: <Settings size={20} />, label: "Settings", action: onSettingsClick },
   ];
 
@@ -113,7 +113,7 @@ const Sidebar = ({
                   <Clock size={20} />
                   <span>History</span>
                 </div>
-                <ul className="pl-8 text-sm space-y-1 max-h-40 overflow-y-auto">
+                <ul className="pl-8 text-sm space-y-1 max-h-70 overflow-y-auto">
                   {historyItems.length > 0 ? (
                     historyItems.map((item, index) => {
                       let label, sessionId;
