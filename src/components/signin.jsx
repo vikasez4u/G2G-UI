@@ -75,6 +75,8 @@
 
 import React, { useState } from 'react';
 
+const url=import.meta.env.VITE_BASE_URL
+
 export default function SignInModal({ onClose, onSignedIn, theme }) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -89,7 +91,7 @@ export default function SignInModal({ onClose, onSignedIn, theme }) {
     }
 
     try {
-      const res = await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/signin', {
+      const res = await fetch(url+'/signin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email }),

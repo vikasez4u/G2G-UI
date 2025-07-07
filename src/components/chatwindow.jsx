@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+const url=import.meta.env.VITE_BASE_URL
+
 export default function ChatWindow({ messages, isSidebarOpen, onSend, onStop, isGenerating, setSuggestions, theme }) {
   const bottomRef = useRef(null);
   const [feedbackGiven, setFeedbackGiven] = useState({});
@@ -15,17 +17,17 @@ export default function ChatWindow({ messages, isSidebarOpen, onSend, onStop, is
     const lastUserMessage = messages.filter(m => m.sender === 'user').at(-1)?.text || '';
     const lastBotMessage = messages.filter(m => m.sender === 'bot').at(-1);
 
-    if (!isGenerating && lastUserMessage && lastBotMessage) {
-      fetch(`http://localhost:8000/suggest?q=${encodeURIComponent(lastUserMessage)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) setSuggestions(data);
-        })
-        .catch((err) => {
-          console.error("❌ Suggestion fetch error:", err);
-          setSuggestions([]);
-        });
-    }
+    // if (!isGenerating && lastUserMessage && lastBotMessage) {
+    //   fetch(url+`/suggest?q=${encodeURIComponent(lastUserMessage)}`)
+    //     .then(res => res.json())
+    //     .then(data => {
+    //       if (Array.isArray(data)) setSuggestions(data);
+    //     })
+    //     .catch((err) => {
+    //       console.error("❌ Suggestion fetch error:", err);
+    //       setSuggestions([]);
+    //     });
+    // }
   }, [isGenerating, messages]);
 
   const handleFeedback = async (idx, question, response, feedbackType) => {
@@ -34,7 +36,7 @@ export default function ChatWindow({ messages, isSidebarOpen, onSend, onStop, is
     setFeedbackGiven(prev => ({ ...prev, [idx]: feedbackType }));
 
     try {
-      await fetch('http://localhost:8000/feedback', {
+      await fetch(url+'/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question, response, feedback: feedbackType, session_id: sessionId }),
@@ -66,7 +68,7 @@ export default function ChatWindow({ messages, isSidebarOpen, onSend, onStop, is
 
   return (
     <div
-      className={`flex-1 overflow-y-auto p-4 space-y-2 pt-20 transition-all duration-300 ${
+      className={`flex-1 overflow-y-auto p-4 space-y-2 pt-20 transition-all duration-300 w-full max-w-full${
         isSidebarOpen ? 'ml-1' : 'ml-0'
       } ${isDark ? 'bg-zinc-900 text-zinc-100' : 'bg-white text-black'}`}
     >
@@ -175,7 +177,7 @@ export default function ChatWindow({ messages, isSidebarOpen, onSend, onStop, is
               {msg.image_ids?.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {msg.image_ids.map((id) => {
-                    const url = `http://localhost:8000/image?image_id=${encodeURIComponent(id)}`;
+                    const url = url+`/image?image_id=${encodeURIComponent(id)}`;
                     return (
                       <img
                         key={id}

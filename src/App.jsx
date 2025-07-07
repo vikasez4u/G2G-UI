@@ -11,6 +11,10 @@ import SettingsPage from './components/settingspage';
 import HelpSupport from './components/helpsupport';
 import SignIn from './components/signin';
 import { v4 as uuidv4 } from 'uuid';
+// import env from '../'; 
+
+const url=import.meta.env.VITE_BASE_URL
+
 
 export default function App() {
   const [showInfo, setShowInfo] = useState(false);
@@ -47,8 +51,10 @@ export default function App() {
 
   useEffect(() => {
     if (signedInUser) {
-      fetch(`https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/get_history?email=${signedInUser.email}`)
-        .then(res => res.json())
+      // fetch(`https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/get_history?email=${signedInUser.email}`)
+            fetch(url+`/get_history?email=${signedInUser.email}`)
+  
+      .then(res => res.json())
         .then(data => {
           if (data.history) {
             setHistoryItems(data.history);
@@ -116,7 +122,9 @@ export default function App() {
     abortControllerRef.current = controller;
 
     try {
-      const res = await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/chat', {
+      // const res = await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/chat', {
+      console.log(url+'/chat')
+      const res = await fetch(url+'/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: message }),
@@ -142,7 +150,9 @@ export default function App() {
 
       if (signedInUser) {
         for (const msg of [...(sessions[sessionId] || []), { sender: 'user', text: message }, botMsg]) {
-          await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/save_message', {
+          // await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/save_message', {
+         await fetch(url+ '/save_message', {
+
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -188,8 +198,10 @@ export default function App() {
       const sessionId = item.session_id;
       setCurrentSessionId(sessionId);
       setChatStarted(true);
-      const res = await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/get_session', {
-        method: 'POST',
+      // const res = await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/get_session', {
+       const res = await fetch(url+'/get_session', {
+ 
+      method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: sessionId, email: signedInUser.email }),
       });
@@ -207,7 +219,7 @@ export default function App() {
   };
 
   return (
-    <div className={`h-screen w-screen font-sans flex flex-col relative ${theme === 'dark' ? 'bg-black text-white' : 'bg-white text-black'}`}>
+    <div className={`h-screen w-screen overflow-x-hidden font-sans flex flex-col relative ${theme === 'dark' ? 'bg-black text-white' : 'bg-white text-black'}`}>
       <Navbar
         signedInUser={signedInUser}
         theme={theme}
@@ -284,7 +296,7 @@ export default function App() {
                   <button onClick={() => setShowInfo(true)} className="border border-gray-300 px-2.5 py-2.5 text-md font-medium hover:text-white hover:bg-fuchsia-600 rounded-lg">Browse Topics</button>
                 </div>
               </div>
-              {showInfo && (
+              {/* {showInfo && (
                 <>
                   <div className="absolute inset-0 bg-white/20 backdrop-blur-sm z-40" />
                   <div className="absolute left-6 top-10 z-50">
@@ -294,13 +306,22 @@ export default function App() {
                     </div>
                   </div>
                 </>
-              )}
+              )} */}
             </div>
           ) : (
             <>
               <ChatWindow messages={messages} isSidebarOpen={isSidebarOpen} onSend={handleSend} setSuggestions={setSuggestions} theme={theme} />
               <div className={`p-4 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
-                <InputBox onSend={handleSend} onStop={handleStop} isGenerating={isGenerating} isChatStarted={true} theme={theme} />
+                {/* <InputBox onSend={handleSend} onStop={handleStop} isGenerating={isGenerating} isChatStarted={true} theme={theme} /> */}
+              <InputBox onSend={handleSend} onStop={handleStop} isGenerating={isGenerating} isChatStarted={true} theme={theme} />
+                           <div className="flex gap-4 mt-2 justify-left">
+                  <button
+                    onClick={() => setShowInfo(true)}
+                    className="border border-gray-300 px-2.5 py-2.5 text-md font-medium hover:text-white hover:bg-fuchsia-600 rounded-lg"
+                  >
+                    Browse Topics
+                  </button>
+                </div>
               </div>
             </>
           )}
@@ -331,6 +352,22 @@ export default function App() {
           )}
         </div>
       </div>
+      {showInfo && (
+        <>
+          <div className="fixed inset-0 bg-white/20 dark:bg-black/40 backdrop-blur-sm z-40" />
+          <div className="fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+            <div className="backdrop-blur-md bg-white/70 dark:bg-zinc-900/80 border border-gray-300 dark:border-gray-600 rounded-xl shadow-xl p-6 w-fit max-w-4xl relative text-black dark:text-white">
+              <button
+                onClick={() => setShowInfo(false)}
+                className="absolute top-2 right-2 border border-black dark:border-white px-3 py-1 text-sm font-bold hover:bg-fuchsia-600 hover:text-white"
+              >
+                X
+              </button>
+              <InfoPage onClose={() => setShowInfo(false)} onSend={handleSend} />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

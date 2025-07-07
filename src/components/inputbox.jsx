@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { Paperclip } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
+const BASEURL=import.meta.env.VITE_BASE_URL
 
 export default function InputBox({ onSend, onStop, isChatStarted, isGenerating,theme }) {
   const [input, setInput] = useState('');
@@ -45,7 +46,7 @@ export default function InputBox({ onSend, onStop, isChatStarted, isGenerating,t
     formData.append('file', file);
 
     try {
-      const res = await fetch('http://localhost:8000/upload', {
+      const res = await fetch(BASEURL+'/upload', {
         method: 'POST',
         body: formData,
       });
@@ -79,34 +80,34 @@ export default function InputBox({ onSend, onStop, isChatStarted, isGenerating,t
       const controller = new AbortController();
       suggestControllerRef.current = controller;
 
-      try {
-        const res = await fetch(
-          `http://localhost:8000/suggest?q=${encodeURIComponent(trimmed)}`,
-          { signal: controller.signal }
-        );
-        const data = await res.json();
+      // try {
+      //   const res = await fetch(
+      //     BASEURL+`/suggest?q=${encodeURIComponent(trimmed)}`,
+      //     { signal: controller.signal }
+      //   );
+      //   const data = await res.json();
 
-        if (trimmed !== input.trim()) return;
+      //   if (trimmed !== input.trim()) return;
 
-        if (Array.isArray(data)) {
-          setSuggestions(data.slice(0, 3));
-          setLastFetchedInput(trimmed);
-        } else {
-          setSuggestions([]);
-        }
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          console.error('❌ Suggestion fetch error:', err);
-          setSuggestions([]);
-        }
-      } finally {
-        setIsTyping(false);
-      }
+      //   if (Array.isArray(data)) {
+      //     setSuggestions(data.slice(0, 3));
+      //     setLastFetchedInput(trimmed);
+      //   } else {
+      //     setSuggestions([]);
+      //   }
+      // } catch (err) {
+      //   if (err.name !== 'AbortError') {
+      //     console.error('❌ Suggestion fetch error:', err);
+      //     setSuggestions([]);
+      //   }
+      // } finally {
+      //   setIsTyping(false);
+      // }
     };
 
-    const timeout = setTimeout(fetchSuggestions, 300);
+    // const timeout = setTimeout(fetchSuggestions, 300);
     return () => {
-      clearTimeout(timeout);
+      // clearTimeout(timeout);
       if (suggestControllerRef.current) {
         suggestControllerRef.current.abort();
       }
@@ -115,7 +116,7 @@ export default function InputBox({ onSend, onStop, isChatStarted, isGenerating,t
 
   const previewImages = useMemo(() => (
     uploadedImageIds.map((id) => {
-      const url = `http://localhost:8000/image?image_id=${encodeURIComponent(id)}`;
+      const url = BASEURL+`/image?image_id=${encodeURIComponent(id)}`;
       return (
         <img
           key={id}
