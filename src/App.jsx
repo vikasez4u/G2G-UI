@@ -12,7 +12,7 @@ import HelpSupport from './components/helpsupport';
 import SignIn from './components/signin';
 import { v4 as uuidv4 } from 'uuid';
 import { useMsal } from "@azure/msal-react";
-import { loginRequest } from "../authConfig";
+import { loginRequest } from "./authConfig";
 
 const url=import.meta.env.VITE_BASE_URL
 
