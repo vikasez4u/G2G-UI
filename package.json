@@ -11,14 +11,15 @@
     "start": "serve -s build"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.10",
-    "@azure/msal-react": "^3.0.14",
     "@azure/msal-browser": "^4.14.0",
+    "@azure/msal-react": "^3.0.14",
+    "@tailwindcss/vite": "^4.1.10",
     "axios": "^1.10.0",
     "lucide-react": "^0.516.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.3",
+    "serve": "^14.2.4",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
