@@ -1,15 +1,30 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { MsalProvider } from "@azure/msal-react";
-import { PublicClientApplication } from "@azure/msal-browser";
+import { PublicClientApplication, LogLevel } from "@azure/msal-browser";
 import App from "./App";
 import { msalConfig, loginRequest } from "./authConfig";
+
+// Add logging to msalConfig
+msalConfig.system = {
+  loggerOptions: {
+    loggerCallback: (level, message, containsPii) => {
+      console.log(`[MSAL] ${message}`);
+    },
+    logLevel: LogLevel.Verbose,
+    piiLoggingEnabled: false,
+  },
+};
 
 const msalInstance = new PublicClientApplication(msalConfig);
 
 const MsalLoader = () => {
   const [msalReady, setMsalReady] = useState(false);
+  const hasRunRef = useRef(false);
 
   useEffect(() => {
+    if (hasRunRef.current) return;
+    hasRunRef.current = true;
+
     const init = async () => {
       try {
         await msalInstance.initialize();
