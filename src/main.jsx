@@ -8,19 +8,22 @@ import { msalConfig } from "./authConfig";
 
 const msalInstance = new PublicClientApplication(msalConfig);
 
-await msalInstance.initialize();
-await msalInstance.handleRedirectPromise().catch((error) => {
-  console.error("Redirect error:", error);
-});
+async function main() {
+  await msalInstance.initialize();
+  await msalInstance.handleRedirectPromise().catch((error) => {
+    console.error("Redirect error:", error);
+  });
 
-const container = document.getElementById("root");
-const root = ReactDOM.createRoot(container);
+  const container = document.getElementById("root");
+  const root = ReactDOM.createRoot(container);
 
-root.render(
-  <React.StrictMode>
-    <MsalProvider instance={msalInstance}>
-      <App />
-    </MsalProvider>
-  </React.StrictMode>
-);
+  root.render(
+    <React.StrictMode>
+      <MsalProvider instance={msalInstance}>
+        <App />
+      </MsalProvider>
+    </React.StrictMode>
+  );
+}
 
+main();
