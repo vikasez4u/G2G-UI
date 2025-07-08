@@ -11,10 +11,11 @@ import SettingsPage from './components/settingspage';
 import HelpSupport from './components/helpsupport';
 import SignIn from './components/signin';
 import { v4 as uuidv4 } from 'uuid';
-import { useMsal } from "@azure/msal-react";
+import { useMsal, useIsAuthenticated } from "@azure/msal-react";
+import { InteractionStatus } from '@azure/msal-browser';
 import { loginRequest } from "./authConfig";
 
-const url=import.meta.env.VITE_BASE_URL
+const url = import.meta.env.VITE_BASE_URL
 
 
 export default function App() {
@@ -41,18 +42,19 @@ export default function App() {
 
   const isFirstRender = useRef(true);
 
-  const { instance } = useMsal();
+  const { instance, inProgress, accounts } = useMsal();
 
-  useEffect(() => {
-    // Automatically redirect to login if not authenticated
-    const accounts = instance.getAllAccounts();
-    if (accounts.length === 0) {
-      instance.loginRedirect(loginRequest).catch((error) => {
-        console.error("Login failed:", error);
-      });
+ useEffect(() => {
+  const initializeAndLogin = async () => {
+    await instance.initialize();
+    if (inProgress === InteractionStatus.None && accounts.length === 0) {
+      instance.loginRedirect(loginRequest);
     }
-  }, [instance]);
-  
+  };
+
+  initializeAndLogin();
+}, [inProgress, accounts, instance]);
+
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
@@ -65,8 +67,8 @@ export default function App() {
   useEffect(() => {
     if (signedInUser) {
       // fetch(`https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/get_history?email=${signedInUser.email}`)
-            fetch(url+`/get_history?email=${signedInUser.email}`)
-  
+      fetch(url + `/get_history?email=${signedInUser.email}`)
+
         .then(res => res.json())
         .then(data => {
           if (data.history) {
@@ -136,8 +138,8 @@ export default function App() {
 
     try {
       // const res = await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/chat', {
-      console.log(url+'/chat')
-      const res = await fetch(url+'/chat', {
+      console.log(url + '/chat')
+      const res = await fetch(url + '/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: message }),
@@ -164,7 +166,7 @@ export default function App() {
       if (signedInUser) {
         for (const msg of [...(sessions[sessionId] || []), { sender: 'user', text: message }, botMsg]) {
           // await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/save_message', {
-         await fetch(url+ '/save_message', {
+          await fetch(url + '/save_message', {
 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -212,8 +214,8 @@ export default function App() {
       setCurrentSessionId(sessionId);
       setChatStarted(true);
       // const res = await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/get_session', {
-       const res = await fetch(url+'/get_session', {
- 
+      const res = await fetch(url + '/get_session', {
+
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: sessionId, email: signedInUser.email }),
@@ -257,15 +259,15 @@ export default function App() {
           onHomeClick={handleHomeClick}
           theme={theme}
           onProfileClick={() => {
-    if (!signedInUser) setShowSignIn(true);
-    else {
-      setShowProfile(true);
-      setChatStarted(false);
-      setShowContact(false);
-      setShowInfo(false);
-      setShowSettings(false);
-    }
-  }}
+            if (!signedInUser) setShowSignIn(true);
+            else {
+              setShowProfile(true);
+              setChatStarted(false);
+              setShowContact(false);
+              setShowInfo(false);
+              setShowSettings(false);
+            }
+          }}
           onSettingsClick={() => {
             setShowSettings(true);
             setShowProfile(false);
@@ -327,7 +329,7 @@ export default function App() {
               <div className={`p-4 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
                 {/* <InputBox onSend={handleSend} onStop={handleStop} isGenerating={isGenerating} isChatStarted={true} theme={theme} /> */}
                 <InputBox onSend={handleSend} onStop={handleStop} isGenerating={isGenerating} isChatStarted={true} theme={theme} />
-                           <div className="flex gap-4 mt-2 justify-left">
+                <div className="flex gap-4 mt-2 justify-left">
                   <button
                     onClick={() => setShowInfo(true)}
                     className="border border-gray-300 px-2.5 py-2.5 text-md font-medium hover:text-white hover:bg-fuchsia-600 rounded-lg"
