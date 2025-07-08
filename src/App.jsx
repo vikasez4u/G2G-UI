@@ -11,7 +11,8 @@ import SettingsPage from './components/settingspage';
 import HelpSupport from './components/helpsupport';
 import SignIn from './components/signin';
 import { v4 as uuidv4 } from 'uuid';
-// import env from '../'; 
+import { useMsal } from "@azure/msal-react";
+import { loginRequest } from "../authConfig";
 
 const url=import.meta.env.VITE_BASE_URL
 
@@ -40,6 +41,18 @@ export default function App() {
 
   const isFirstRender = useRef(true);
 
+  const { instance } = useMsal();
+
+  useEffect(() => {
+    // Automatically redirect to login if not authenticated
+    const accounts = instance.getAllAccounts();
+    if (accounts.length === 0) {
+      instance.loginRedirect(loginRequest).catch((error) => {
+        console.error("Login failed:", error);
+      });
+    }
+  }, [instance]);
+  
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
@@ -54,7 +67,7 @@ export default function App() {
       // fetch(`https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/get_history?email=${signedInUser.email}`)
             fetch(url+`/get_history?email=${signedInUser.email}`)
   
-      .then(res => res.json())
+        .then(res => res.json())
         .then(data => {
           if (data.history) {
             setHistoryItems(data.history);
@@ -201,7 +214,7 @@ export default function App() {
       // const res = await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/get_session', {
        const res = await fetch(url+'/get_session', {
  
-      method: 'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: sessionId, email: signedInUser.email }),
       });
@@ -313,7 +326,7 @@ export default function App() {
               <ChatWindow messages={messages} isSidebarOpen={isSidebarOpen} onSend={handleSend} setSuggestions={setSuggestions} theme={theme} />
               <div className={`p-4 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
                 {/* <InputBox onSend={handleSend} onStop={handleStop} isGenerating={isGenerating} isChatStarted={true} theme={theme} /> */}
-              <InputBox onSend={handleSend} onStop={handleStop} isGenerating={isGenerating} isChatStarted={true} theme={theme} />
+                <InputBox onSend={handleSend} onStop={handleStop} isGenerating={isGenerating} isChatStarted={true} theme={theme} />
                            <div className="flex gap-4 mt-2 justify-left">
                   <button
                     onClick={() => setShowInfo(true)}
