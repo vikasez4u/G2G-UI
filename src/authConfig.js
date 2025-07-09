@@ -62,3 +62,10 @@ export const loginRequest = {
 export const graphConfig = {
     graphMeEndpoint: "https://graph.microsoft.com/v1.0/me",
 };
+
+export const BASE_URL = {
+ 
+BE_BASE_URL:"https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net"
+//BE_BASE_URL:"http://localhost:8000"
+
+};
