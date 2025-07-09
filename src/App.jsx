@@ -12,8 +12,8 @@ import HelpSupport from './components/helpsupport';
 import SignIn from './components/signin';
 import { v4 as uuidv4 } from 'uuid';
 import { useMsal, useIsAuthenticated } from "@azure/msal-react";
-import { InteractionStatus } from '@azure/msal-browser';
-import { loginRequest } from "./authConfig";
+import { InteractionStatus, InteractionRequiredAuthError } from '@azure/msal-browser';
+//import { loginRequest } from "./authConfig";
 
 const url = import.meta.env.VITE_BASE_URL
 
@@ -43,31 +43,112 @@ export default function App() {
   const isFirstRender = useRef(true);
 
   const { instance, inProgress, accounts } = useMsal();
+  const isAuthenticated = useIsAuthenticated();
+  const [data, setData] = useState(null);
 
- useEffect(() => {
-  const initializeAndLogin = async () => {
-    await instance.initialize();
-    if (inProgress === InteractionStatus.None && accounts.length === 0) {
-      instance.loginRedirect(loginRequest);
+  const req = { 
+      scopes: ["api://18bea863-348d-41f2-b82b-6162e1822bbb/user_impersonation"], 
+      account: accounts[0] 
+    };
+
+   useEffect(() => {
+  const fetchData = async () => {
+    
+    try {
+      const resp = await instance.acquireTokenSilent(req);
+      const res = await fetch(url + "/api/login", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resp.accessToken}`,
+          "Content-Type": "application/json"
+        }
+      });
+      const result = await res.json();
+      console.log(result);
+    } catch (e) {
+      if (e instanceof InteractionRequiredAuthError) {
+        instance.acquireTokenPopup(req).then(fetchData);
+      } else {
+        console.error(e);
+      }
     }
   };
 
-  initializeAndLogin();
-}, [inProgress, accounts, instance]);
+  fetchData();
+}, [isAuthenticated, instance, accounts, inProgress]);
 
-  useEffect(() => {
+ /*useEffect(() => {
+  const request = {
+      scopes: ["api://18bea863-348d-41f2-b82b-6162e1822bbb/user_impersonation"],
+      account: accounts[0],
+    };
+
+  if (isAuthenticated && inProgress === InteractionStatus.None) {
+     instance.acquireTokenSilent(request).then(response => {
+      setData(response.accessToken);
+      const token = response.accessToken;
+          return fetch(url +"/api/login", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json" }
+          });
+    }).catch(error => {
+      if (error instanceof InteractionRequiredAuthError) {  
+        instance.acquireTokenRedirect(request);
+      }
+    });
+  } else {
+    instance.loginRedirect(loginRequest);
+  }
+}, [isAuthenticated, instance, accounts, inProgress]);*/
+
+useEffect(() => {
+  if (isFirstRender.current) {
+    isFirstRender.current = false;
+    return;
+  }
+  // Initialize MSAL instance and check authentication status
+  if (isAuthenticated) {
+    const user = accounts[0];
+    setSignedInUser(user);
+    console.log('User authenticated:', user);
+    localStorage.setItem('g2g_user', JSON.stringify(user));
+  }
+  if (!isAuthenticated && signedInUser) {
+    setSignedInUser(null);
+    localStorage.removeItem('g2g_user');
+    setHistoryItems([]);
+    setSessions({});
+    setMessages([]);
+    setCurrentSessionId(null);
+  } 
+  // Initialize MSAL instance
+  if (inProgress === InteractionStatus.None && accounts.length > 0) {
+    instance.setActiveAccount(accounts[0]);
+  }
+  // If no accounts are found, redirect to login
+  if (inProgress === InteractionStatus.None && accounts.length === 0) {
+    instance.loginRedirect(req);
+  }
+
+  initializeAndLogin();
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('theme', theme);
+}, [inProgress, accounts, instance, theme]);
+
+  /*useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
     }
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('theme', theme);
-  }, [theme]);
+  }, [theme]); */
 
   useEffect(() => {
     if (signedInUser) {
       // fetch(`https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/get_history?email=${signedInUser.email}`)
-      fetch(url + `/get_history?email=${signedInUser.email}`)
+      fetch(url + `/get_history?email=${signedInUser.username}`)
 
         .then(res => res.json())
         .then(data => {
