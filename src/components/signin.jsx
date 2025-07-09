@@ -76,7 +76,7 @@
 import React, { useState } from 'react';
 import { baseUrl } from '../authConfig'; // Adjust the import path as necessary
 
-const url = import.meta.env.VITE_BASE_URL? import.meta.env.VITE_BASE_URL : baseUrl.BE_BASE_URL;
+const url = import.meta.env.VITE_BASE_URL? import.meta.env.VITE_BASE_URL : baseUrl;
 
 export default function SignInModal({ onClose, onSignedIn, theme }) {
   const [username, setUsername] = useState('');
