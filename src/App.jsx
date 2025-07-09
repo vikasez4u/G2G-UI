@@ -131,7 +131,7 @@ useEffect(() => {
     instance.loginRedirect(req);
   }
 
-  initializeAndLogin();
+  //initializeAndLogin();
   document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('theme', theme);
 }, [inProgress, accounts, instance, theme]);
