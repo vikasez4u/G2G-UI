@@ -15,7 +15,7 @@ import { useMsal, useIsAuthenticated } from "@azure/msal-react";
 import { InteractionStatus, InteractionRequiredAuthError } from '@azure/msal-browser';
 import { baseUrl } from "./authConfig";
 
-const url = import.meta.env.VITE_BASE_URL? import.meta.env.VITE_BASE_URL : baseUrl.BE_BASE_URL;
+const url = import.meta.env.VITE_BASE_URL? import.meta.env.VITE_BASE_URL : baseUrl;
 
 
 
