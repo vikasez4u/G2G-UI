@@ -52,10 +52,12 @@ export default function App() {
     };
 
    useEffect(() => {
+    console.log("Verifing Login Details")
   const fetchData = async () => {
     
     try {
       const resp = await instance.acquireTokenSilent(req);
+      console.log("BASE_URL", url)
       const res = await fetch(url + "/api/login", {
         method: "POST",
         headers: {
