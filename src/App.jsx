@@ -13,9 +13,10 @@ import SignIn from './components/signin';
 import { v4 as uuidv4 } from 'uuid';
 import { useMsal, useIsAuthenticated } from "@azure/msal-react";
 import { InteractionStatus, InteractionRequiredAuthError } from '@azure/msal-browser';
-//import { loginRequest } from "./authConfig";
+import { baseUrl } from "./authConfig";
 
-const url = import.meta.env.VITE_BASE_URL
+const url = import.meta.env.VITE_BASE_URL? import.meta.env.VITE_BASE_URL : baseUrl.BE_BASE_URL;
+
 
 
 export default function App() {

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { baseUrl } from '../authConfig'; // Adjust the import path as necessary
 
-const url=import.meta.env.VITE_BASE_URL
+const url = import.meta.env.VITE_BASE_URL? import.meta.env.VITE_BASE_URL : baseUrl.BE_BASE_URL;
 
 export default function ChatWindow({ messages, isSidebarOpen, onSend, onStop, isGenerating, setSuggestions, theme }) {
   const bottomRef = useRef(null);
