@@ -13,9 +13,10 @@ import HelpSupport from './components/helpsupport';
 import { v4 as uuidv4 } from 'uuid';
 import { useMsal, useIsAuthenticated } from "@azure/msal-react";
 import { InteractionStatus, InteractionRequiredAuthError } from '@azure/msal-browser';
-//import { loginRequest } from "./authConfig";
+import { baseUrl } from "./authConfig";
 
-const url = import.meta.env.VITE_BASE_URL
+const url = import.meta.env.VITE_BASE_URL? import.meta.env.VITE_BASE_URL : baseUrl;
+
 
 
 export default function App() {
@@ -65,11 +66,12 @@ const [signedInUser, setSignedInUser] = useState(() => {
       account: accounts[0] 
     };
 
- useEffect(() => {
+   useEffect(() => {
   const fetchData = async () => {
     
     try {
       const resp = await instance.acquireTokenSilent(req);
+      console.log("BASE_URL", url)
       const res = await fetch(url + "/api/login", {
         method: "POST",
         headers: {
