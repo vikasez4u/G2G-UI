@@ -178,11 +178,11 @@ export default function ChatWindow({ messages, isSidebarOpen, onSend, onStop, is
               {msg.image_ids?.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {msg.image_ids.map((id) => {
-                    const url = url+`/image?image_id=${encodeURIComponent(id)}`;
+                    const imageurl = url+`/image?image_id=${encodeURIComponent(id)}`;
                     return (
                       <img
                         key={id}
-                        src={url}
+                        src={imageurl}
                         alt="Related"
                         className="w-36 h-40 object-cover rounded border"
                         onError={(e) => {

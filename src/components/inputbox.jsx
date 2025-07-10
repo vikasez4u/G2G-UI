@@ -27,6 +27,7 @@ export default function InputBox({ onSend, onStop, isChatStarted, isGenerating,t
     setCurrentSessionId(sessionId);
 
     onSend(textToSend, uploadedImageIds, sessionId);
+     setIsTyping(false);
     setInput('');
     setSuggestions([]);
     setUploadedImageIds([]);
@@ -67,7 +68,7 @@ export default function InputBox({ onSend, onStop, isChatStarted, isGenerating,t
     }
 
     const trimmed = input.trim();
-    if (trimmed.length < 2 || trimmed === lastFetchedInput) {
+    if (isGenerating||trimmed.length < 2 || trimmed === lastFetchedInput) {
       setIsTyping(false);
       return;
     }

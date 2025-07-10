@@ -9,7 +9,7 @@ import Sidebar from './components/sidebar';
 import ProfilePage from './components/profilepage';
 import SettingsPage from './components/settingspage';
 import HelpSupport from './components/helpsupport';
-import SignIn from './components/signin';
+// import SignIn from './components/signin';
 import { v4 as uuidv4 } from 'uuid';
 import { useMsal, useIsAuthenticated } from "@azure/msal-react";
 import { InteractionStatus, InteractionRequiredAuthError } from '@azure/msal-browser';
@@ -23,11 +23,25 @@ export default function App() {
   const [showInfo, setShowInfo] = useState(false);
   const [chatStarted, setChatStarted] = useState(false);
   const [messages, setMessages] = useState([]);
+   const hasSignedIn = useRef(false); 
   const [showContact, setShowContact] = useState(false);
-  const [signedInUser, setSignedInUser] = useState(() => {
-    const stored = localStorage.getItem('g2g_user');
-    return stored ? JSON.parse(stored) : null;
-  });
+  const { instance, inProgress, accounts } = useMsal();
+  // const { instance, inProgress, accounts } = useMsal();
+
+  // const msalUser = accounts[0];
+  // const signedInUser = msalUser
+  //   ? { username: msalUser.name, email: msalUser.username }
+  //   : null;
+
+const [signedInUser, setSignedInUser] = useState(() => {
+  const msalUser = accounts[0];
+  return msalUser ? { username: msalUser.name, email: msalUser.username } : null;
+});
+
+  // const [signedInUser, setSignedInUser] = useState(() => {
+  //   const stored = localStorage.getItem('g2g_user');
+  //   return stored ? JSON.parse(stored) : null;
+  // });
   const [historyItems, setHistoryItems] = useState([]);
   const [sessions, setSessions] = useState({});
   const [currentSessionId, setCurrentSessionId] = useState(null);
@@ -37,23 +51,22 @@ export default function App() {
   const [showProfile, setShowProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
-  const [showSignIn, setShowSignIn] = useState(false);
+  // const [showSignIn, setShowSignIn] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
   const [suggestions, setSuggestions] = useState([]);
-
+  const hasFetchedHistory = useRef(false);
   const isFirstRender = useRef(true);
 
-  const { instance, inProgress, accounts } = useMsal();
+  
   const isAuthenticated = useIsAuthenticated();
   const [data, setData] = useState(null);
-
+  
   const req = { 
       scopes: ["api://18bea863-348d-41f2-b82b-6162e1822bbb/user_impersonation"], 
       account: accounts[0] 
     };
 
    useEffect(() => {
-    console.log("Verifing Login Details")
   const fetchData = async () => {
     
     try {
@@ -98,7 +111,7 @@ export default function App() {
     }).catch(error => {
       if (error instanceof InteractionRequiredAuthError) {  
         instance.acquireTokenRedirect(request);
-      }
+    }
     });
   } else {
     instance.loginRedirect(loginRequest);
@@ -111,12 +124,22 @@ useEffect(() => {
     return;
   }
   // Initialize MSAL instance and check authentication status
+  // if (isAuthenticated) {
+  //   const user = accounts[0];
+  //   setSignedInUser(user);
+  //   console.log('User authenticated:', user);
+  //   localStorage.setItem('g2g_user', JSON.stringify(user));
+  // }
   if (isAuthenticated) {
-    const user = accounts[0];
-    setSignedInUser(user);
-    console.log('User authenticated:', user);
-    localStorage.setItem('g2g_user', JSON.stringify(user));
-  }
+  const user = {
+    username: accounts[0]?.name,    // Full name
+    email: accounts[0]?.username,   // Email address
+  };
+  setSignedInUser(user);
+  console.log('User authenticated:', user);
+  localStorage.setItem('g2g_user', JSON.stringify(user));
+}
+
   if (!isAuthenticated && signedInUser) {
     setSignedInUser(null);
     localStorage.removeItem('g2g_user');
@@ -148,25 +171,27 @@ useEffect(() => {
     localStorage.setItem('theme', theme);
   }, [theme]); */
 
-  useEffect(() => {
+useEffect(() => {
     if (signedInUser) {
       // fetch(`https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/get_history?email=${signedInUser.email}`)
-      fetch(url + `/get_history?email=${signedInUser.username}`)
+      fetch(url + `/get_history?email=${signedInUser.email}`)
 
-        .then(res => res.json())
-        .then(data => {
-          if (data.history) {
-            setHistoryItems(data.history);
-          }
-        })
-        .catch(err => console.error('Error fetching history:', err));
+
+      .then(res => res.json())
+      .then(data => {
+        if (data.history) {
+          setHistoryItems(data.history);
+        }
+      })
+      .catch(err => console.error('Error fetching history:', err));
     } else {
-      const savedHistory = localStorage.getItem('chatHistory');
-      const savedSessions = localStorage.getItem('chatSessions');
-      if (savedHistory) setHistoryItems(JSON.parse(savedHistory));
-      if (savedSessions) setSessions(JSON.parse(savedSessions));
-    }
-  }, [signedInUser]);
+    const savedHistory = localStorage.getItem('chatHistory');
+    const savedSessions = localStorage.getItem('chatSessions');
+    if (savedHistory) setHistoryItems(JSON.parse(savedHistory));
+    if (savedSessions) setSessions(JSON.parse(savedSessions));
+    hasFetchedHistory.current = false; // Reset if user logs out
+  }
+}, [signedInUser]);
 
   useEffect(() => {
     if (!signedInUser) {
@@ -248,23 +273,27 @@ useEffect(() => {
       setSessions(prev => ({ ...prev, [sessionId]: [...(prev[sessionId] || []), botMsg] }));
 
       if (signedInUser) {
-        for (const msg of [...(sessions[sessionId] || []), { sender: 'user', text: message }, botMsg]) {
-          // await fetch('https://g2g-be-c4gybve0aubchahv.eastasia-01.azurewebsites.net/save_message', {
-          await fetch(url + '/save_message', {
+                  const toSave = [
+                  { sender: 'user', text: message },
+                  botMsg
+                ];
 
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              session_id: sessionId,
-              email: signedInUser.email,
-              sender: msg.sender,
-              text: msg.text,
-              created_at: new Date().toISOString(),
-              image_ids: msg.image_ids || [],
-              related_links: msg.related_links || [],
-            }),
-          });
-        }
+      for (const msg of toSave) {
+        await fetch(url + '/save_message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: sessionId,
+            email: signedInUser.email,
+            sender: msg.sender,
+            text: msg.text,
+            created_at: new Date().toISOString(),
+            image_ids: msg.image_ids || [],
+            related_links: msg.related_links || [],
+          }),
+        });
+      }
+
       }
     } catch (err) {
       const errorText = err.name === 'AbortError' || err.message === 'aborted' ? 'Response stopped' : 'Sorry, there was an error connecting to the server.';
@@ -322,18 +351,19 @@ useEffect(() => {
       <Navbar
         signedInUser={signedInUser}
         theme={theme}
-        onSignInClick={() => setShowSignIn(true)}
-        onProfileClick={() => {
-          if (!signedInUser) setShowSignIn(true);
-          else {
-            setShowProfile(true);
-            setChatStarted(false);
-            setShowContact(false);
-            setShowInfo(false);
-            setShowSettings(false);
+        // onSignInClick={() => setShowSignIn(true)}
+        // onProfileClick={() => {
+        //   if (!signedInUser) setShowSignIn(true);
+        //   else {
+        //     setShowProfile(true);
+        //     setChatStarted(false);
+        //     setShowContact(false);
+        //     setShowInfo(false);
+        //     setShowSettings(false);
 
-          }
-        }}
+        //   }
+        // }}
+        onProfileClick={() => setShowProfile(true)}
       />
 
       <div className="flex flex-1">
@@ -343,8 +373,8 @@ useEffect(() => {
           onHomeClick={handleHomeClick}
           theme={theme}
           onProfileClick={() => {
-            if (!signedInUser) setShowSignIn(true);
-            else {
+            // if (!signedInUser) setShowSignIn(true);
+            {
               setShowProfile(true);
               setChatStarted(false);
               setShowContact(false);
@@ -367,17 +397,19 @@ useEffect(() => {
         />
 
         <div className={`transition-all duration-300 flex flex-col flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-0'}`}>
-          {showProfile && signedInUser && (
+          {showProfile  && (
+            // && signedInUser
             <ProfilePage
               user={signedInUser}
               onClose={() => setShowProfile(false)}
               onSignOut={() => {
-                setSignedInUser(null);
-                localStorage.removeItem('g2g_user');
-                setHistoryItems([]);
-                setSessions({});
-                setMessages([]);
-                setCurrentSessionId(null);
+                // setSignedInUser(null);
+                // localStorage.removeItem('g2g_user');
+                // setHistoryItems([]);
+                // setSessions({});
+                // setMessages([]);
+                // setCurrentSessionId(null);
+                instance.logoutRedirect();
                 setShowProfile(false);
               }}
             />
@@ -437,7 +469,7 @@ useEffect(() => {
             </>
           )}
 
-          {showSignIn && (
+          {/* {showSignIn && (
             <SignIn
               onClose={() => setShowSignIn(false)}
               onSignedIn={(user) => {
@@ -448,7 +480,7 @@ useEffect(() => {
                 setShowSignIn(false);
               }}
             />
-          )}
+          )} */}
         </div>
       </div>
       {showInfo && (
