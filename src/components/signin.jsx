@@ -171,7 +171,7 @@
 
 
 import React, { useState } from 'react';
-import { baseUrl } from "./authConfig";
+import { baseUrl } from "./authConfig"; 
 
 const url = import.meta.env.VITE_BASE_URL? import.meta.env.VITE_BASE_URL : baseUrl;
 
