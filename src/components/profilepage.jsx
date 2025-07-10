@@ -40,9 +40,9 @@ export default function ProfilePage({ user = {}, onClose, onSignOut, theme }) {
             }`}>
               <p><strong>Name:</strong> {name}</p>
               <p><strong>Email:</strong> {email}</p>
-              <p><strong>Role:</strong> Analyst</p>
+              {/* <p><strong>Role:</strong> Analyst</p>
               <p><strong>Joined:</strong> Jan 1, 2023</p>
-              <p><strong>Preferences:</strong> Notifications Enabled</p>
+              <p><strong>Preferences:</strong> Notifications Enabled</p> */}
 
               {onSignOut && (
                 <button
