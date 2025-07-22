@@ -251,7 +251,7 @@ useEffect(() => {
       const res = await fetch(url + '/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: message }),
+        body: JSON.stringify({ question: message, username: signedInUser.username}),
         signal: controller.signal,
       });
       const data = await res.json();
